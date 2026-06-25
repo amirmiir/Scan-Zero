@@ -92,6 +92,7 @@ go.work.sum
 
 # gomobile build artifact (regenerable; rebuilt via `gomobile bind`)
 scannercore/scannercore.aar
+scannercore/scannercore-sources.jar
 
 # ======================================================================
 # Project
