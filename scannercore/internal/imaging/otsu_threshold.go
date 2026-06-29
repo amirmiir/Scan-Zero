@@ -11,39 +11,45 @@ type histStats struct {
 	weightedSum int
 }
 
-// Naive O(N×256) Otsu search: 256 full-image scans, float64 accumulation per pixel.
-// 1920×1080 benchmark: ~1050ms on Ryzen 7 (L3-resident). Phone DRAM-eviction: est.3-5×
-// slower → ~60-100s for 20 pages. Intentionally unoptimized baseline; histogram in
-// otsuThreshold(histStats) collapses this to one O(N) pass + O(256) bin search.
+// O(N+256) Otsu: single histogram pass
+// wB/sumB accumulate incrementally; wF/sumF derived from histogram totals — no secondaccumulator.
+// float64 means
 func otsuThreshold(in *image.Gray) uint8 {
 	var out uint8
 	maxVariance := 0.0
+	histogram := computeHistogram(in)
+	countB, countF := 0.0, float64(histogram.n)
+	sumB, sumF := 0.0, 0.0
 
 	for t := range 256 {
 		//for each possible threshold we need to iterate over the whole image so we determine the optimal t (sort of uneducated brute-force)
-		countB, countF := 0.0, 0.0
-		sumB, sumF := 0.0, 0.0
 
 		//now we need to separate into two groups the background and foreground
-		for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
-			for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
-				pixelValue := in.Pix[in.PixOffset(x, y)]
-				if pixelValue > uint8(t) { //foreground
-					countF++
-					sumF += float64(pixelValue)
-				} else { //background
-					countB++
-					sumB += float64(pixelValue)
-				}
-			}
-		}
+		//BUT NOW WE USE THE HISTOGRAM
+		current := histogram.counts[t]
+		countB += float64(current)
+		countF = float64(histogram.n) - countB
 
-		totalPixels := countF + countB
+		// for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+		// 	for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
+		// 		pixelValue := in.Pix[in.PixOffset(x, y)]
+		// 		if pixelValue > uint8(t) { //foreground
+		// 			countF++
+		// 			sumF += float64(pixelValue)
+		// 		} else { //background
+		// 			countB++
+		// 			sumB += float64(pixelValue)
+		// 		}
+		// 	}
+		// }
+		sumB += float64(t) * float64(current)
+		sumF = float64(histogram.weightedSum) - sumB
+
 		if countB == 0 || countF == 0 {
 			continue
 		}
-		wB := countB / totalPixels
-		wF := countF / totalPixels
+		wB := countB / float64(histogram.n)
+		wF := countF / float64(histogram.n)
 		muB := sumB / countB
 		muF := sumF / countF
 
