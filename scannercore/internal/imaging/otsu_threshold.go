@@ -14,10 +14,10 @@ type histStats struct {
 // O(N+256) Otsu: single histogram pass
 // wB/sumB accumulate incrementally; wF/sumF derived from histogram totals — no secondaccumulator.
 // float64 means
-func otsuThreshold(in *image.Gray) uint8 {
+func otsuThreshold(histogram histStats) uint8 {
 	var out uint8
 	maxVariance := 0.0
-	histogram := computeHistogram(in)
+	// histogram := computeHistogram(in)
 	countB, countF := 0.0, float64(histogram.n)
 	sumB, sumF := 0.0, 0.0
 
@@ -30,18 +30,6 @@ func otsuThreshold(in *image.Gray) uint8 {
 		countB += float64(current)
 		countF = float64(histogram.n) - countB
 
-		// for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
-		// 	for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
-		// 		pixelValue := in.Pix[in.PixOffset(x, y)]
-		// 		if pixelValue > uint8(t) { //foreground
-		// 			countF++
-		// 			sumF += float64(pixelValue)
-		// 		} else { //background
-		// 			countB++
-		// 			sumB += float64(pixelValue)
-		// 		}
-		// 	}
-		// }
 		sumB += float64(t) * float64(current)
 		sumF = float64(histogram.weightedSum) - sumB
 

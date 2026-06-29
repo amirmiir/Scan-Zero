@@ -16,7 +16,7 @@ func TestOtsuThreshold_Bimodal(t *testing.T) {
 	img.Pix[2] = 200
 	img.Pix[3] = 200
 
-	result := otsuThreshold(img)
+	result := otsuThreshold(computeHistogram(img))
 
 	assert.GreaterOrEqual(t, result, uint8(50))
 	assert.Less(t, result, uint8(200))
@@ -30,7 +30,7 @@ func TestOtsuThreshold_Degenerate(t *testing.T) {
 		img.Pix[i] = 128
 	}
 
-	assert.NotPanics(t, func() { otsuThreshold(img) })
+	assert.NotPanics(t, func() { otsuThreshold(computeHistogram(img)) })
 }
 
 // Fixture {0,0,128,255}: counts, total pixel count, and weighted sum must be exact.
@@ -83,6 +83,6 @@ func BenchmarkOtsuThreshold(b *testing.B) {
 	}
 	b.ResetTimer()
 	for range b.N {
-		otsuThreshold(img)
+		otsuThreshold(computeHistogram(img))
 	}
 }
