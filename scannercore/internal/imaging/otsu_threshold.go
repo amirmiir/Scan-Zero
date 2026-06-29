@@ -5,11 +5,16 @@ import (
 	"math"
 )
 
+type histStats struct {
+	counts      [256]int
+	n           int
+	weightedSum int
+}
+
 // Naive O(N×256) Otsu search: 256 full-image scans, float64 accumulation per pixel.
 // 1920×1080 benchmark: ~1050ms on Ryzen 7 (L3-resident). Phone DRAM-eviction: est.3-5×
 // slower → ~60-100s for 20 pages. Intentionally unoptimized baseline; histogram in
 // otsuThreshold(histStats) collapses this to one O(N) pass + O(256) bin search.
-
 func otsuThreshold(in *image.Gray) uint8 {
 	var out uint8
 	maxVariance := 0.0
@@ -50,4 +55,23 @@ func otsuThreshold(in *image.Gray) uint8 {
 	}
 
 	return out
+}
+
+func computeHistogram(in *image.Gray) histStats {
+	//single pass per image
+	//okay, for this, we need to have a histogram after we have received the image in grayscale;
+	//O(N) N is the WxH?
+	var histogram histStats
+
+	for y := in.Bounds().Min.Y; y < in.Bounds().Max.Y; y++ {
+		for x := in.Bounds().Min.X; x < in.Bounds().Max.X; x++ {
+			histogram.counts[in.Pix[in.PixOffset(x, y)]]++
+		}
+	}
+	histogram.n = (in.Bounds().Max.X - in.Bounds().Min.X) * (in.Bounds().Max.Y - in.Bounds().Min.Y)
+	for intensity := range 256 {
+		histogram.weightedSum += histogram.counts[intensity] * intensity
+	}
+
+	return histogram
 }
