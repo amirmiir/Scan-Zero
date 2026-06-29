@@ -2,6 +2,7 @@ package imaging
 
 import (
 	"image"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,6 +15,20 @@ func TestApplyBinary(t *testing.T) {
 	img.Pix[0] = 50  // below t
 	img.Pix[1] = 128 // at t — must be ink (0)
 	img.Pix[2] = 200 // above t
+
+	out := applyBinary(img, 128)
+
+	assert.Equal(t, uint8(0), out.Pix[0])
+	assert.Equal(t, uint8(0), out.Pix[1])
+	assert.Equal(t, uint8(255), out.Pix[2])
+}
+
+// Exact boundary: t-1 → ink (0), t itself → ink (0), t+1 → paper (255).
+func TestApplyBinary_Boundary(t *testing.T) {
+	img := image.NewGray(image.Rect(0, 0, 3, 1))
+	img.Pix[0] = 127 // t-1 → black
+	img.Pix[1] = 128 // t   → black (≤ not <)
+	img.Pix[2] = 129 // t+1 → white
 
 	out := applyBinary(img, 128)
 
@@ -70,4 +85,17 @@ func TestApplyContrastAnchor_HighClamp(t *testing.T) {
 	out := applyContrastAnchor(img, 250, 10, 50) // vLow=240, vHigh=min(255,300)=255
 
 	assert.Equal(t, uint8(0), out.Pix[0])
+}
+
+func BenchmarkApplyContrastAnchor(b *testing.B) {
+	//we create a 1920x1080 *image.Gray & seed the randomizer
+
+	img := image.NewGray(image.Rect(0, 0, 1920, 1080))
+	rng := rand.New(rand.NewSource(42))
+	rng.Read(img.Pix)
+
+	for b.Loop() {
+		applyContrastAnchor(img, 128, 10, 10)
+	}
+
 }

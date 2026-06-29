@@ -99,8 +99,7 @@ var sink *image.Gray
 func BenchmarkToGray(b *testing.B) {
 	img := image.NewYCbCr(image.Rect(0, 0, 1920, 1080), image.YCbCrSubsampleRatio420)
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		sink = ToGray(img)
 	}
 }

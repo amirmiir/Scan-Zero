@@ -81,8 +81,8 @@ func BenchmarkOtsuThreshold(b *testing.B) {
 	for i := range img.Pix {
 		img.Pix[i] = uint8(i % 256)
 	}
-	b.ResetTimer()
-	for range b.N {
+
+	for b.Loop() {
 		otsuThreshold(computeHistogram(img))
 	}
 }
