@@ -42,7 +42,24 @@ func main() {
 		fmt.Fprintf(os.Stderr, "write gray: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Printf("gray -> %s\n", stagePath(imageInPath, "gray"))
+	fmt.Printf("gray   -> %s\n", stagePath(imageInPath, "gray"))
+
+	t := imaging.Threshold(gray)
+	fmt.Printf("otsu threshold: %d\n", t)
+
+	binary := imaging.ApplyBinary(gray, t)
+	if err := writeJPEG(stagePath(imageInPath, "binary"), binary); err != nil {
+		fmt.Fprintf(os.Stderr, "write binary: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("binary -> %s\n", stagePath(imageInPath, "binary"))
+
+	anchor := imaging.ApplyContrastAnchor(gray, t, 40, 40)
+	if err := writeJPEG(stagePath(imageInPath, "anchor"), anchor); err != nil {
+		fmt.Fprintf(os.Stderr, "write anchor: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Printf("anchor -> %s\n", stagePath(imageInPath, "anchor"))
 }
 
 func stagePath(input, stage string) string {
