@@ -11,6 +11,10 @@ type histStats struct {
 	weightedSum int
 }
 
+func Threshold(in *image.Gray) uint8 {
+	return otsuThreshold(computeHistogram(in))
+}
+
 // O(N+256) Otsu: single histogram pass
 // wB/sumB accumulate incrementally; wF/sumF derived from histogram totals — no secondaccumulator.
 // float64 means
