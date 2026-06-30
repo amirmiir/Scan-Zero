@@ -16,7 +16,7 @@ func TestApplyBinary(t *testing.T) {
 	img.Pix[1] = 128 // at t — must be ink (0)
 	img.Pix[2] = 200 // above t
 
-	out := applyBinary(img, 128)
+	out := ApplyBinary(img, 128)
 
 	assert.Equal(t, uint8(0), out.Pix[0])
 	assert.Equal(t, uint8(0), out.Pix[1])
@@ -30,7 +30,7 @@ func TestApplyBinary_Boundary(t *testing.T) {
 	img.Pix[1] = 128 // t   → black (≤ not <)
 	img.Pix[2] = 129 // t+1 → white
 
-	out := applyBinary(img, 128)
+	out := ApplyBinary(img, 128)
 
 	assert.Equal(t, uint8(0), out.Pix[0])
 	assert.Equal(t, uint8(0), out.Pix[1])
@@ -43,7 +43,7 @@ func TestApplyBinary_NoMutate(t *testing.T) {
 	img.Pix[0] = 10
 	img.Pix[1] = 200
 
-	applyBinary(img, 128)
+	ApplyBinary(img, 128)
 
 	assert.Equal(t, uint8(10), img.Pix[0])
 	assert.Equal(t, uint8(200), img.Pix[1])
@@ -56,7 +56,7 @@ func TestApplyContrastAnchor_ThreeZones(t *testing.T) {
 	img.Pix[1] = 90  // inside band [80,120] → preserved
 	img.Pix[2] = 150 // above vHigh (100+20=120) → white
 
-	out := applyContrastAnchor(img, 100, 20, 20)
+	out := ApplyContrastAnchor(img, 100, 20, 20)
 
 	assert.Equal(t, uint8(0), out.Pix[0])
 	assert.Equal(t, uint8(90), out.Pix[1])
@@ -70,7 +70,7 @@ func TestApplyContrastAnchor_LowClamp(t *testing.T) {
 	img := image.NewGray(image.Rect(0, 0, 1, 1))
 	img.Pix[0] = 100
 
-	out := applyContrastAnchor(img, 10, 50, 10) // vLow=max(0,10-50)=0, vHigh=20
+	out := ApplyContrastAnchor(img, 10, 50, 10) // vLow=max(0,10-50)=0, vHigh=20
 
 	assert.Equal(t, uint8(255), out.Pix[0])
 }
@@ -82,7 +82,7 @@ func TestApplyContrastAnchor_HighClamp(t *testing.T) {
 	img := image.NewGray(image.Rect(0, 0, 1, 1))
 	img.Pix[0] = 100
 
-	out := applyContrastAnchor(img, 250, 10, 50) // vLow=240, vHigh=min(255,300)=255
+	out := ApplyContrastAnchor(img, 250, 10, 50) // vLow=240, vHigh=min(255,300)=255
 
 	assert.Equal(t, uint8(0), out.Pix[0])
 }
@@ -95,7 +95,7 @@ func BenchmarkApplyContrastAnchor(b *testing.B) {
 	rng.Read(img.Pix)
 
 	for b.Loop() {
-		applyContrastAnchor(img, 128, 10, 10)
+		ApplyContrastAnchor(img, 128, 10, 10)
 	}
 
 }

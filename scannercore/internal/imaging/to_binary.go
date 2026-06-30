@@ -2,7 +2,7 @@ package imaging
 
 import "image"
 
-func applyBinary(in *image.Gray, t uint8) *image.Gray {
+func ApplyBinary(in *image.Gray, t uint8) *image.Gray {
 	//we copy the size
 	out := image.NewGray(in.Bounds())
 
@@ -19,7 +19,7 @@ func applyBinary(in *image.Gray, t uint8) *image.Gray {
 	return out
 }
 
-func applyContrastAnchor(in *image.Gray, t, l, h uint8) *image.Gray {
+func ApplyContrastAnchor(in *image.Gray, t, l, h uint8) *image.Gray {
 	out := image.NewGray(in.Bounds())
 
 	vLowInt := int(t) - int(l)
