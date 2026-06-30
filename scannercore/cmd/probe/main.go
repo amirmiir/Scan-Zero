@@ -54,7 +54,7 @@ func main() {
 	}
 	fmt.Printf("binary -> %s\n", stagePath(imageInPath, "binary"))
 
-	anchor := imaging.ApplyContrastAnchor(gray, t, 40, 40)
+	anchor := imaging.ApplyContrastAnchor(gray, t, imaging.DefaultMarginLow, imaging.DefaultMarginHigh)
 	if err := writeJPEG(stagePath(imageInPath, "anchor"), anchor); err != nil {
 		fmt.Fprintf(os.Stderr, "write anchor: %v\n", err)
 		os.Exit(1)

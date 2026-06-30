@@ -49,7 +49,7 @@ func ProcessImage(inputPath string, outputPath string) (string, error) {
 
 	grayImg := imaging.ToGray(img)
 	t := imaging.Threshold(grayImg)
-	resultImg := imaging.ApplyContrastAnchor(grayImg, t, 10, 10)
+	resultImg := imaging.ApplyContrastAnchor(grayImg, t, imaging.DefaultMarginLow, imaging.DefaultMarginHigh)
 
 	outFile, err := os.Create(outputPath)
 	if err != nil {
